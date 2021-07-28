@@ -28,12 +28,14 @@ export function Home() {
   async function loadData() {
     try {
       const storagedData = await AsyncStorage.getItem('@passmanager:logins');
-      const storagedDataFormatted: LoginListDataProps =
-        storagedData ? JSON.parse(storagedData)
-          : [];
+
+      if (!storagedData) return;
+
+      const storagedDataFormatted: LoginListDataProps = JSON.parse(storagedData);
 
       setSearchListData(storagedDataFormatted);
       setData(storagedDataFormatted);
+
     } catch (error) {
       console.error(error);
     }
