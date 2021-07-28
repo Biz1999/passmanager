@@ -15,6 +15,7 @@ import {
   HeaderTitle,
   Form
 } from './styles';
+import { useEffect } from 'react';
 
 interface FormData {
   title: string;
@@ -36,15 +37,28 @@ export function RegisterLoginData() {
     formState: {
       errors
     }
-  } = useForm();
+  } = useForm({
+    resolver: yupResolver(schema)
+  });
 
   async function handleRegister(formData: FormData) {
     const newLoginData = {
       id: String(uuid.v4()),
       ...formData
     }
-
-    // Save data on AsyncStorage
+    try {
+      const asyncKey = '@passmanager:logins';
+      const currentData = await AsyncStorage.getItem(asyncKey);
+      const currentDataFormatted = currentData ? JSON.parse(currentData) : [];
+      const dataFormatted = [
+        ...currentDataFormatted,
+        newLoginData,
+      ]
+      await AsyncStorage.setItem(asyncKey, JSON.stringify(dataFormatted));
+      reset();
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   return (
@@ -60,9 +74,7 @@ export function RegisterLoginData() {
           <Input
             title="Título"
             name="title"
-            error={
-              // message error here
-            }
+            error={errors.title && errors.title.message}
             control={control}
             placeholder="Escreva o título aqui"
             autoCapitalize="sentences"
@@ -71,9 +83,7 @@ export function RegisterLoginData() {
           <Input
             title="Email"
             name="email"
-            error={
-              // message error here
-            }
+            error={errors.email && errors.email.message}
             control={control}
             placeholder="Escreva o Email aqui"
             autoCorrect={false}
@@ -83,9 +93,7 @@ export function RegisterLoginData() {
           <Input
             title="Senha"
             name="password"
-            error={
-              // message error here
-            }
+            error={errors.password && errors.password.message}
             control={control}
             secureTextEntry
             placeholder="Escreva a senha aqui"
